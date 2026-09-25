@@ -1,0 +1,10 @@
+# editor settings
+.idea/
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# local test output
+.playwright-mcp/
