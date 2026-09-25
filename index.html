@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ceiling Wave Explorer v3</title>
+<title>Ceiling Wave Generator</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,7 @@
   <aside class="side">
 
     <header>
-      <div class="eyebrow">Ceiling <span id="roomLabel">227 × 355 cm</span> · <span id="areaLabel">8.06 m²</span></div>
-      <h1>Ceiling Wave Explorer</h1>
+      <h1>Ceiling Wave Generator</h1>
     </header>
 
     <div class="group">
@@ -108,7 +107,10 @@
   </aside>
 
   <main class="stage">
-    <div class="readout" id="profile" hidden><span>Wave profile · outer edge</span><b id="profileLen"></b></div>
+    <div class="readout">
+      <div class="item"><span>Ceiling area</span><b id="areaLabel"></b></div>
+      <div class="item prof" id="profile" hidden><span>Wave profile · outer edge</span><b id="profileLen"></b></div>
+    </div>
     <button class="pdfbtn" id="print" type="button">⤓ Save PDF</button>
     <div class="plan">
       <svg id="svg" role="img" preserveAspectRatio="xMidYMid meet" aria-label="Live ceiling plan of the wavy lit groove">

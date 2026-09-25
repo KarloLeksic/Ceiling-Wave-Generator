@@ -1,4 +1,4 @@
-/* Ceiling Wave Explorer
+/* Ceiling Wave Generator - plan and print a wavy LED ceiling
    ---------------------------------------------------------------------------
    The loop is 12 circular arcs that all share one radius R and meet
    tangentially. Equal radii means every pair of neighbouring arc centres sits
@@ -21,7 +21,15 @@
   // the approved plan: restored by the pinned preset, and the first-visit default
   var DEF = { w: 355, h: 228, gh: 18, gv: 18, r: 40, pat: 'corner', g: 10 };
   var LEGACY = { w: 355, h: 227, g: 13 };              // for old presets saved without these
-  var LS_STATE = 'waveExplorerV3', LS_PRESETS = 'waveExplorerPresets';
+  var LS_STATE = 'ceilingWaveState', LS_PRESETS = 'ceilingWavePresets';
+  // Keys from before the rename. Read once, copied to the new keys on first
+  // load so saved state and presets survive; the old entries are left alone.
+  try {
+    [['waveExplorerV3', LS_STATE], ['waveExplorerPresets', LS_PRESETS]].forEach(function (k) {
+      var old = localStorage.getItem(k[0]);
+      if (old !== null && localStorage.getItem(k[1]) === null) localStorage.setItem(k[1], old);
+    });
+  } catch (e) {}
 
   // room, recomputed whenever the dimensions change
   var W, H, HW, HH, CX, CY, u, gridStep, VB;
@@ -85,7 +93,6 @@
     $('radMax').textContent = radMax + ' — lazy';
     $('ghHint').textContent = 'from the ' + H + ' walls';
     $('gvHint').textContent = 'from the ' + W + ' walls';
-    $('roomLabel').textContent = H + ' × ' + W + ' cm';
     $('areaLabel').textContent = (W * H / 10000).toFixed(2) + ' m²';
   }
 
@@ -1082,7 +1089,7 @@
   $('print').addEventListener('click', async function () {
     var btn = this, label = btn.textContent;
     if (!lastDraw) { btn.textContent = 'nothing to print'; setTimeout(function(){ btn.textContent = label; }, 1600); return; }
-    var bytes, name = 'ceiling-plan-' + W + 'x' + H + '-R' + lastDraw.R + '.pdf';
+    var bytes, name = 'ceiling-wave-generator-' + W + 'x' + H + '-R' + lastDraw.R + '.pdf';
     try {
       bytes = buildPDF(lastDraw.rg, lastDraw.o, lastDraw.inn, lastDraw.gh, lastDraw.gv, lastDraw.R);
     } catch (e) { window.print(); return; }

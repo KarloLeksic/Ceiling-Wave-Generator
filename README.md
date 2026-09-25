@@ -79,9 +79,9 @@ Original approved build (355 × 227, gaps 35/35, R 40, Tucks): outer 7.48 m, bat
 - **Plan:** outer edge (solid), inner edge (dashed), centres (filled = lobe, hollow = tuck; off-ceiling centres in `--warn-line`), hover/click tooltip with `(x, y)`.
 - **Wall gap** marked at top-left corner lobe (`dimX/dimY`).
 - **Tuck depths:** line from wall through tuck centre to deepest point of solid line, labelled (`rg.depths`, `depthMarks()`). Corner shape: one top/bottom + one left/right tuck; classic: mid tuck.
-- **Wave profile length** (outer edge) pinned top-left of plan (`#profileLen`): `len(o)` = Σ `radius × sweep` of drawn outer arcs, in m.
-- **Legend** under caption, inside SVG (`legend()`), shrinks to fit.
+- **Card pinned top-left of plan** (`.readout`): **Ceiling area** (`#areaLabel`) and **wave profile length**, one below the other (outer edge, `#profileLen`: `len(o)` = Σ `radius × sweep` of drawn outer arcs, in m).
 - **Save PDF** pinned top-right (`#print.pdfbtn`).
+- **Legend** under caption, inside SVG (`legend()`), shrinks to fit.
 
 Sidebar: room size, wall distances (+ same-distance toggle), Corners Lobes/Tucks, radius, groove width, presets (with pinned **Approved plan**).
 
@@ -118,7 +118,7 @@ Main path: `setRoom` → `retuneControls` + `buildChrome` (static layer). Any co
 
 **`index.html` contract** — `app.js` addresses IDs directly, throws if renamed:
 - Controls: `roomW roomH swap gh ghNum ghMax ghHint gv gvNum gvMax gvHint rad radNum radMin radMax grv grvNum link patCorner patClassic print reset approvedInfo pname save presets phint`
-- Read-outs: `roomLabel areaLabel profile profileLen`
+- Read-outs: `areaLabel profile profileLen`
 - SVG groups, paint order = z-order: `grid roomFill band axes roomOutline inner outer screws dims origin chrome msg tip` (`band` under edges, `tip` last)
 - Print: `printsheet pspec psvg ptables pfoot`, plus `<style id="pagestyle">` for `@page`
 
@@ -149,12 +149,12 @@ Sheet: spec strip (ceiling, radius, inner radii, wall gap, wave profile); grid +
 
 ## 7. Stored state
 
-Per-browser `localStorage`, every access in `try/catch`. Key names kept from earlier versions:
+Per-browser `localStorage`, every access in `try/catch`. Old keys `waveExplorerV3` / `waveExplorerPresets` copied to new ones on first load (old left alone).
 
 | Key | Holds |
 |---|---|
-| `waveExplorerV3` | `W, H, gh, gv, R, linked, cornerLobes, groove` (missing `cornerLobes` → lobes, missing `groove` → 10) |
-| `waveExplorerPresets` | JSON `{name, w, h, gh, gv, r, pat, g}`; `pat` `'corner'`/`'classic'`. Old presets: no size → 355 × 227, no `pat` → classic, no `g` → 13 (`LEGACY`) |
+| `ceilingWaveState` | `W, H, gh, gv, R, linked, cornerLobes, groove` (missing `cornerLobes` → lobes, missing `groove` → 10) |
+| `ceilingWavePresets` | JSON `{name, w, h, gh, gv, r, pat, g}`; `pat` `'corner'`/`'classic'`. Old presets: no size → 355 × 227, no `pat` → classic, no `g` → 13 (`LEGACY`) |
 
 ---
 

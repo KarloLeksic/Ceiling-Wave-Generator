@@ -120,6 +120,10 @@ img  { max-width: 100%; }
   }
   .readout span{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
   .readout b{font-family:"IBM Plex Mono",monospace;font-size:18px;font-weight:600;color:var(--edge);font-variant-numeric:tabular-nums;}
+  /* area and profile, one below the other */
+  .readout .item:not([hidden]){display:flex;flex-direction:column;gap:2px;}
+  .readout .item + .item:not([hidden]){border-top:1px solid var(--rule-soft);padding-top:6px;margin-top:4px;}
+  .readout b{white-space:nowrap;}
   .stage .plan{
     width:100%;height:100%;
     display:flex;align-items:center;justify-content:center;
