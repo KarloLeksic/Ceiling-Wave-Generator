@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ceiling Wave Explorer v3</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="side">
+
+    <header>
+      <div class="eyebrow">Ceiling <span id="roomLabel">227 × 355 cm</span> · <span id="areaLabel">8.06 m²</span></div>
+      <h1>Ceiling Wave Explorer</h1>
+    </header>
+
+    <div class="group">
+      <div class="gtitle">Ceiling</div>
+      <div class="room">
+        <div class="rctl">
+          <label for="roomW">Length · X</label>
+          <span class="field"><input class="num sm" type="number" id="roomW" min="120" max="1500" step="1" value="355"><i>cm</i></span>
+        </div>
+        <div class="rctl">
+          <label for="roomH">Width · Y</label>
+          <span class="field"><input class="num sm" type="number" id="roomH" min="120" max="1500" step="1" value="227"><i>cm</i></span>
+        </div>
+        <button id="swap" type="button" title="Swap length and width">⇄</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="gtitle">Distance from wall</div>
+
+      <div class="ctl">
+        <div class="ctl-top">
+          <label for="gh">Horizontal · left &amp; right</label>
+          <input class="num" type="number" id="ghNum" min="5" max="60" step="1" value="35" aria-label="Horizontal distance in cm">
+        </div>
+        <input type="range" id="gh" min="5" max="60" step="1" value="35" aria-label="Horizontal distance slider">
+        <div class="ends"><span>5</span><span id="ghHint">from the 227 walls</span><span id="ghMax">60</span></div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-top">
+          <label for="gv">Vertical · top &amp; bottom</label>
+          <input class="num" type="number" id="gvNum" min="5" max="60" step="1" value="35" aria-label="Vertical distance in cm">
+        </div>
+        <input type="range" id="gv" min="5" max="60" step="1" value="35" aria-label="Vertical distance slider">
+        <div class="ends"><span>5</span><span id="gvHint">from the 355 walls</span><span id="gvMax">60</span></div>
+      </div>
+
+      <label class="switch">
+        <input type="checkbox" id="link">
+        <i class="slot"></i>
+        <span>Same distance from all four walls</span>
+      </label>
+    </div>
+
+    <div class="group">
+      <div class="gtitle">Arcs</div>
+      <div class="seg" role="group" aria-label="What sits in the corners">
+        <span>Corners</span>
+        <button type="button" id="patCorner" aria-pressed="true">Lobes</button>
+        <button type="button" id="patClassic" aria-pressed="false">Tucks</button>
+      </div>
+      <div class="ctl">
+        <div class="ctl-top">
+          <label for="rad">Radius of the circles</label>
+          <input class="num" type="number" id="radNum" min="20" max="80" step="1" value="40" aria-label="Radius in cm">
+        </div>
+        <input type="range" id="rad" min="20" max="80" step="1" value="40" aria-label="Radius slider">
+        <div class="ends"><span id="radMin">20 — tight</span><span id="radMax">80 — lazy</span></div>
+      </div>
+      <div class="ctl">
+        <div class="ctl-top">
+          <label for="grv">Groove width</label>
+          <input class="num" type="number" id="grvNum" min="4" max="30" step="1" value="10" aria-label="Groove width in cm">
+        </div>
+        <input type="range" id="grv" min="4" max="30" step="1" value="10" aria-label="Groove width slider">
+        <div class="ends"><span>4</span><span>space between the solid and dashed lines</span><span>30</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="gtitle">Presets</div>
+      <div class="presets">
+        <span class="preset approved">
+          <button class="load" id="reset" type="button"><b>Approved plan</b><i id="approvedInfo"></i></button>
+          <span class="tag" aria-hidden="true">★</span>
+        </span>
+      </div>
+      <div class="btnrow">
+        <input class="name" type="text" id="pname" placeholder="name this one…" maxlength="24" aria-label="Preset name">
+        <button id="save" type="button">Save</button>
+      </div>
+      <div class="presets" id="presets"></div>
+      <div class="hint" id="phint"></div>
+    </div>
+
+  </aside>
+
+  <main class="stage">
+    <div class="readout" id="profile" hidden><span>Wave profile · outer edge</span><b id="profileLen"></b></div>
+    <button class="pdfbtn" id="print" type="button">⤓ Save PDF</button>
+    <div class="plan">
+      <svg id="svg" role="img" preserveAspectRatio="xMidYMid meet" aria-label="Live ceiling plan of the wavy lit groove">
+        <g id="grid"></g>
+        <rect id="roomFill"></rect>
+        <path id="band" fill-rule="evenodd"></path>
+        <g id="axes"></g>
+        <rect id="roomOutline" fill="none"></rect>
+        <path id="inner" fill="none"></path>
+        <path id="outer" fill="none"></path>
+        <g id="screws"></g>
+        <g id="dims"></g>
+        <g id="origin"></g>
+        <g id="chrome"></g>
+        <text id="msg" text-anchor="middle"></text>
+        <g id="tip"></g>
+      </svg>
+    </div>
+  </main>
+
+</div>
+
+<div class="printsheet" id="printsheet">
+  <div class="pspec" id="pspec"></div>
+  <svg id="psvg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="ptables" id="ptables"></div>
+  <div class="pfoot" id="pfoot"></div>
+</div>
+
+<style id="pagestyle"></style>
+
+<script src="app.js"></script>
+</body>
+</html>
