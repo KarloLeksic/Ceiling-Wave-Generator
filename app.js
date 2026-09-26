@@ -1,17 +1,88 @@
 /* Ceiling Wave Generator - plan and print a wavy LED ceiling
    ---------------------------------------------------------------------------
-   The loop is 12 circular arcs that all share one radius R and meet
-   tangentially. Equal radii means every pair of neighbouring arc centres sits
-   exactly 2R apart, so the twelve centres form a closed equilateral 12-gon and
-   each arc runs between the midpoints of the two polygon sides meeting at its
-   centre. The loop therefore closes on itself by construction.
+   WHAT GETS BUILT
+   The whole ceiling drops 12 cm as one plasterboard surface. A lit groove
+   (width = the groove control, 10 cm default) runs round it as a closed wave;
+   the LED profile sits centred on the groove's top face. It is marked out on
+   site from circle centres: a fix point at each centre, an arc swung with a
+   drilled batten. This page exists to produce those centres, radii and
+   distances.
 
-   The 12-gon is built directly from the two wall distances and R:
-     p  = W/2 - gh - R      x-offset of the end-lobe centres
-     r2 = H/2 - gv - R      y-offset of the side-lobe centres
-     r1 = min(0.552p, 1.9R) x-offset of the side-lobe centres (free parameter)
-     V2 = the outer intersection of two circles of radius 2R about V1 and V3
-     s  = r2 + sqrt(4R^2 - r1^2)   y-offset of the mid-tuck centres
+   COORDINATES
+   Origin (0, 0) is the bottom-left corner, X right along the length wall,
+   Y up. Geometry runs y-down internally (SVG); every figure shown to the user
+   goes through fy(y) = H - y - new read-outs must too.
+
+   PRINCIPLE
+   The loop is circular arcs that all share one radius R and meet tangentially.
+   Neighbouring arcs curve opposite ways, so their centres sit exactly 2R apart
+   and meet at the midpoint of the line joining them. So:
+     1. the centres form a closed equilateral polygon, every side 2R;
+     2. each arc runs between the midpoints of the two polygon sides at its
+        centre - no join table needed;
+     3. the on-site check is one number: every neighbouring pair of centres
+        2R apart means the loop closes with no kink.
+   Lobe ('L') bulges out towards the wall, centre inside the loop, inner
+   radius R - groove. Tuck ('T') pulls in, centre outside, inner R + groove.
+   Two arrangements: ringCorner (default) and ringClassic (Tucks switch).
+
+   RULES - DO NOT BREAK
+     1. Every lobe sits exactly the requested distance from its wall. Verify by
+        sampling the drawn path (see TESTING), not by reading params.
+     2. Every neighbouring centre pair stays 2R apart.
+     3. Never hard-code the centre count: 12 only in classic, 4 (nx + ny) in
+        corner. Read it from rg.V.
+     4. ring() and degenerate(), always both. Check .bad first.
+     5. Read-outs come from the drawn arcs, never construction params.
+     6. Page, PDF and print sheet are separate renderers of the same geometry -
+        change one, change the others.
+
+   MAIN PATH
+   setRoom -> retuneControls + buildChrome (static layer). Any control ->
+   render(save) -> draw(gh, gv, R) -> ring -> arcs(rg, 0) outer /
+   arcs(rg, groove) inner -> SVG, dims, profile -> buildPrint. The PDF is
+   built on demand from lastDraw.
+   Scale u = max(W, H) / 355: the SVG works in cm and every on-screen stroke,
+   font and marker is a multiple of u, so the drawing looks the same at any
+   size. The print sheet uses its own k (same definition); the PDF sizes text
+   in points.
+
+   FILES
+   index.html  markup only; every SVG group is filled from here. IDs are
+               addressed directly - see the contract comment in index.html.
+   style.css   theme tokens, two-pane shell, components, print sheet.
+   app.js      everything else - one IIFE, no dependencies, no build step.
+               Only external request: Google Fonts.
+
+   TESTING
+   Serve with `python -m http.server 8080` (file:// may block localStorage).
+   The check that matters - sample the drawn path; every local minimum of the
+   wall distance must equal the requested gap (one distinct value = correct):
+     var outer = document.getElementById('outer'), L = outer.getTotalLength();
+     for (var i = 0; i <= 1200; i++) {
+       var p = outer.getPointAtLength(L * i / 1200);
+       d.push(Math.min(p.x, W - p.x, p.y, H - p.y));
+     }
+   Check PDFs by rendering them, not by reading code. Traps: synthetic events
+   skip hit-testing (use page.mouse.move()); emulateMedia({media:'screen'})
+   before page.pdf() puts the whole UI in the PDF; check both themes - SVG
+   children don't inherit component styles (the tooltip has its own --tip-*
+   tokens); quote SVG attributes (stroke-width=1.2/> swallows the slash).
+
+   PUBLISHING TO THE ARTIFACT
+   The artifact runtime supplies its own doctype/head/body: publish index.html
+   with the skeleton stripped (keep <title>, the fonts link, the style.css
+   link, the body and <script src="app.js">), plus style.css and app.js as
+   files, to the existing URL so it updates in place. The `downloads`
+   capability is stored on the artifact and carries forward on republish.
+
+   TRIED AND REJECTED
+   - Quarter-turn pattern selector: rotation exact but fits few radii; the
+     closed form strands lobes (15 vs 41 cm); a Newton solver worked but broke
+     the fixed 12-centre count. Superseded by the corner-lobe shape.
+   - Four-different-radii loop (20 centres) - didn't match the reference photo.
+   - Screws wording, dashed centre polygon, stats panel, centre table,
+     off-ceiling text warning - removed by the owner.
    --------------------------------------------------------------------------- */
 (function () {
   'use strict';
@@ -21,6 +92,12 @@
   // the approved plan: restored by the pinned preset, and the first-visit default
   var DEF = { w: 355, h: 228, gh: 18, gv: 18, r: 40, pat: 'corner', g: 10 };
   var LEGACY = { w: 355, h: 227, g: 13 };              // for old presets saved without these
+  // Per-browser storage, every access in try/catch.
+  //   ceilingWaveState    {W, H, gh, gv, R, linked, cornerLobes, groove}
+  //                       (missing cornerLobes -> lobes, missing groove -> 10)
+  //   ceilingWavePresets  [{name, w, h, gh, gv, r, pat: 'corner'|'classic', g}]
+  //                       (old presets: no size -> LEGACY, no pat -> classic,
+  //                       no g -> LEGACY.g)
   var LS_STATE = 'ceilingWaveState', LS_PRESETS = 'ceilingWavePresets';
   // Keys from before the rename. Read once, copied to the new keys on first
   // load so saved state and presets survive; the old entries are left alone.
@@ -256,6 +333,21 @@
     };
   }
 
+  // The original approved shape, twelve centres in closed form. One quarter
+  // is built, then mirrored x4:
+  //   p  = W/2 - gh - R        x-offset of the end-lobe centre (on the X axis)
+  //   r2 = H/2 - gv - R        y-offset of the side-lobe centres
+  //   r1 = min(0.552p, 1.9R)   x-offset of the side-lobe centres
+  //   V1 = (CX + p, CY)        end lobe
+  //   V3 = (CX + r1, CY - r2)  side lobe
+  //   V2 = intersection of the circles of radius 2R about V1 and V3, the one
+  //        FURTHER from the room centre                        (corner tuck)
+  //   s  = r2 + sqrt(4R^2 - r1^2);  V4 = (CX, CY - s)          (mid tuck)
+  // r1 is the only free knob: 0.552p reproduces the approved shape, 1.9R keeps
+  // the sqrt real. It won't stretch past about 3 : 1 - the page refuses and
+  // reports the longest length that fits (longestFor).
+  // Original build (355 x 227, gaps 35/35, R 40): outer 7.48 m, batten holes
+  // 27/40/53.
   function ringClassic(gh, gv, R) {
     var p = HW - gh - R, r2 = HH - gv - R;
     if (p <= 2 || r2 <= 2) return { bad: 'The circles are too big for this band — lower the radius.' };
@@ -326,7 +418,8 @@
     return d + ' Z';
   }
 
-  // a loop that folds back on itself shows up as a runaway sweep
+  // A loop that folds back on itself shows up as a runaway sweep: a tuck
+  // turning 175 degrees or more, or a lobe 250 or more.
   function degenerate(rg) {
     var a = arcs(rg, 0), maxT = 0, maxL = 0;
     a.forEach(function (s) {
@@ -465,6 +558,7 @@
   function f2(n) { return (Math.round(n * 100) / 100).toString(); }
 
   // circular arc -> cubic Beziers, at most 90 degrees each, mapped through T
+  // (cm -> points, Y flipped); control arm k = 4/3 tan(sweep / 4)
   function arcOps(C, r, a0, a1, T, ops) {
     var total = a1 - a0, n = Math.max(1, Math.ceil(Math.abs(total) / (Math.PI / 2)));
     var step = total / n;

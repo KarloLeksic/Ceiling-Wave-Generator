@@ -11,6 +11,22 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!--
+  Markup only - app.js fills every SVG group and addresses these IDs directly,
+  so renaming one breaks the page.
+    Controls:  roomW roomH swap gh ghNum ghMax ghHint gv gvNum gvMax gvHint rad
+               radNum radMin radMax grv grvNum link patCorner patClassic print
+               reset approvedInfo pname save presets phint
+    Read-outs: areaLabel profile profileLen
+    SVG groups, paint order = z-order (band under the edges, tip last):
+               grid roomFill band axes roomOutline inner outer screws dims
+               origin chrome msg tip
+    Print:     printsheet pspec psvg ptables pfoot, plus <style id="pagestyle">
+               for @page (it caps the SVG height or the sheet spills to page 2)
+  Layout: .app grid 392px minmax(0,1fr); .side scrolls, .stage stays pinned -
+  no min-width on the SVG, that brings scrolling back. Below 1000px the panes
+  stack.
+-->
 
 <div class="app">
 
