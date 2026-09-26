@@ -2,9 +2,16 @@
 
 Plan and print a wavy LED ceiling.
 
+<p>
+  <img src="media/ceiling-waves-purple-led.jpg" alt="Wave ceiling with purple LED groove over living room" width="49%">
+  <img src="media/ceiling-waves-white-led.jpg" alt="Wave ceiling with white LED groove over dining and living area" width="49%">
+</p>
+
 Enter room size and wall distance, pick curve size, get wave ceiling plan with every circle centre measured. Live plan on screen, one-page A4 PDF for the ladder.
 
-Live app (private until shared): https://claude.ai/artifact/3LGSk477h8fAav6S9uJmQh
+Live app: https://claude.ai/artifact/3LGSk477h8fAav6S9uJmQh
+
+![Ceiling Wave Generator — plan view with sidebar controls](media/app-screenshot.png)
 
 ---
 
@@ -108,6 +115,7 @@ Sidebar: room size, wall distances (+ same-distance toggle), Corners Lobes/Tucks
 index.html   markup only; every SVG group is filled by JS
 style.css    theme tokens, two-pane shell, components, print sheet
 app.js       everything else — one IIFE, no dependencies
+media/       README images (app screenshot, photos of built ceilings)
 ```
 
 No build step. Only external request: Google Fonts (offline falls back to system fonts).
